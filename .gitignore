@@ -7,3 +7,6 @@ weights
 build/
 *.egg-info/
 gradio_cached_examples
+Miniconda3/
+.history
+*.bat

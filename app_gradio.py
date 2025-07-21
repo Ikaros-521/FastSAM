@@ -5,9 +5,17 @@ from utils.tools_gradio import fast_process
 from utils.tools import format_results, box_prompt, point_prompt, text_prompt
 from PIL import ImageDraw
 import numpy as np
+import os
+
+import torch.serialization
+from ultralytics.nn.tasks import SegmentationModel
+from ultralytics.nn.modules import Conv
+torch.serialization.add_safe_globals([torch.nn.modules.container.Sequential])
+torch.serialization.safe_globals([Conv])
+torch.serialization.add_safe_globals([SegmentationModel])
 
 # Load the pre-trained model
-model = YOLO('./weights/FastSAM.pt')
+model = YOLO('./weights/FastSAM-s.pt')
 
 device = torch.device(
     "cuda"
@@ -81,6 +89,8 @@ def segment_everything(
     wider=False,
     mask_random_color=True,
 ):
+    print("Segmenting everything...")
+
     input_size = int(input_size)  # 确保 imgsz 是整数
     # Thanks for the suggestion by hysts in HuggingFace.
     w, h = input.size
@@ -89,12 +99,16 @@ def segment_everything(
     new_h = int(h * scale)
     input = input.resize((new_w, new_h))
 
+    print("即将加载模型，请稍等...")
+
     results = model(input,
                     device=device,
                     retina_masks=True,
                     iou=iou_threshold,
                     conf=conf_threshold,
                     imgsz=input_size,)
+
+    print("模型加载完成，开始处理图像...")
 
     if len(text) > 0:
         results = format_results(results[0], 0)
@@ -103,6 +117,8 @@ def segment_everything(
     else:
         annotations = results[0].masks.data
     
+    print("图像处理完成，开始绘制结果...")
+
     fig = fast_process(annotations=annotations,
                        image=input,
                        device=device,
@@ -112,6 +128,9 @@ def segment_everything(
                        bbox=None,
                        use_retina=use_retina,
                        withContours=withContours,)
+    
+    print(f"type(fig): {type(fig)}")
+    
     return fig
 
 
@@ -159,9 +178,11 @@ def segment_with_points(
                        use_retina=use_retina,
                        withContours=withContours,)
 
+    # print(f"type: {type(fig)}")
+
     global_points = []
     global_point_label = []
-    return fig, None
+    return fig
 
 
 def get_points_with_draw(image, label, evt: gr.SelectData):
@@ -230,13 +251,13 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
                         segment_btn_e = gr.Button("Segment Everything", variant='primary')
                         clear_btn_e = gr.Button("Clear", variant="secondary")
 
-                gr.Markdown("Try some of the examples below ⬇️")
-                gr.Examples(examples=examples,
-                            inputs=[cond_img_e],
-                            outputs=segm_img_e,
-                            fn=segment_everything,
-                            cache_examples=True,
-                            examples_per_page=4)
+                # gr.Markdown("Try some of the examples below ⬇️")
+                # gr.Examples(examples=[],
+                #             inputs=[cond_img_e],
+                #             outputs=segm_img_e,
+                #             fn=segment_everything,
+                #             cache_examples=True,
+                #             examples_per_page=4)
 
             with gr.Column():
                 with gr.Accordion("Advanced options", open=False):
@@ -281,13 +302,13 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
                         segment_btn_p = gr.Button("Segment with points prompt", variant='primary')
                         clear_btn_p = gr.Button("Clear points", variant='secondary')
 
-                gr.Markdown("Try some of the examples below ⬇️")
-                gr.Examples(examples=examples,
-                            inputs=[cond_img_p],
-                            # outputs=segm_img_p,
-                            # fn=segment_with_points,
-                            # cache_examples=True,
-                            examples_per_page=4)
+                # gr.Markdown("Try some of the examples below ⬇️")
+                # gr.Examples(examples=[],
+                #             inputs=[cond_img_p],
+                #             outputs=segm_img_p,
+                #             fn=segment_with_points,
+                #             cache_examples=True,
+                #             examples_per_page=4)
 
             with gr.Column():
                 # Description
@@ -297,7 +318,7 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
 
     segment_btn_p.click(segment_with_points,
                         inputs=[cond_img_p],
-                        outputs=[segm_img_p, cond_img_p])
+                        outputs=[segm_img_p])
 
     with gr.Tab("Text mode"):
         # Images
@@ -326,13 +347,13 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
                         segment_btn_t = gr.Button("Segment with text", variant='primary')
                         clear_btn_t = gr.Button("Clear", variant="secondary")
 
-                gr.Markdown("Try some of the examples below ⬇️")
-                gr.Examples(examples=[["examples/dogs.jpg"]] + examples,
-                            inputs=[cond_img_e],
-                            # outputs=segm_img_e,
-                            # fn=segment_everything,
-                            # cache_examples=True,
-                            examples_per_page=4)
+                # gr.Markdown("Try some of the examples below ⬇️")
+                # gr.Examples(examples=[],
+                #             inputs=[cond_img_e],
+                #             outputs=segm_img_e,
+                #             fn=segment_everything,
+                #             cache_examples=True,
+                #             examples_per_page=4)
 
             with gr.Column():
                 with gr.Accordion("Advanced options", open=False):
@@ -371,4 +392,4 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
     clear_btn_t.click(clear_text, outputs=[cond_img_p, segm_img_p, text_box])
 
 demo.queue()
-demo.launch()
+demo.launch(server_name="0.0.0.0", share=False)
