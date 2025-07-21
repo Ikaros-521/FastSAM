@@ -26,46 +26,46 @@ device = torch.device(
 )
 
 # Description
-title = "<center><strong><font size='8'>🏃 Fast Segment Anything 🤗</font></strong></center>"
+title = "<center><strong><font size='8'>🏃 快速分割任意物体 🤗</font></strong></center>"
 
-news = """ # 📖 News
-        🔥 2023/07/14: Add a "wider result" button in text mode (Thanks for [gaoxinge](https://github.com/CASIA-IVA-Lab/FastSAM/pull/95)).
+news = """ # 📖 新闻
+        🔥 2023/07/14: 在文本模式下添加了“更宽结果”按钮（感谢 [gaoxinge](https://github.com/CASIA-IVA-Lab/FastSAM/pull/95)）。
 
-        🔥 2023/06/29: Support the text mode (Thanks for [gaoxinge](https://github.com/CASIA-IVA-Lab/FastSAM/pull/47)).
+        🔥 2023/06/29: 支持文本模式（感谢 [gaoxinge](https://github.com/CASIA-IVA-Lab/FastSAM/pull/47)）。
 
-        🔥 2023/06/26: Support the points mode. (Better and faster interaction will come soon!)
+        🔥 2023/06/26: 支持点模式。（更好更快的交互即将到来！）
 
-        🔥 2023/06/24: Add the 'Advanced options" in Everything mode to get a more detailed adjustment.        
+        🔥 2023/06/24: 在全分割模式下添加“高级选项”，以获得更详细的调整。        
         """  
 
-description_e = """This is a demo on Github project 🏃 [Fast Segment Anything Model](https://github.com/CASIA-IVA-Lab/FastSAM). Welcome to give a star ⭐️ to it.
+description_e = """这是 Github 项目 🏃 [Fast Segment Anything Model](https://github.com/CASIA-IVA-Lab/FastSAM) 的演示。欢迎为其点亮一颗星 ⭐️。
                 
-                🎯 Upload an Image, segment it with Fast Segment Anything (Everything mode). The other modes will come soon.
+                🎯 上传一张图片，使用 Fast Segment Anything 进行分割（全分割模式）。其他模式即将上线。
                 
-                ⌛️ It takes about 6~ seconds to generate segment results. The concurrency_count of queue is 1, please wait for a moment when it is crowded.
+                ⌛️ 生成分割结果大约需要 6 秒。队列的并发数为 1，人多时请耐心等待。
                 
-                🚀 To get faster results, you can use a smaller input size and leave high_visual_quality unchecked.
+                🚀 想要更快的结果，可以使用更小的输入尺寸，并取消勾选高视觉质量。
                 
-                📣 You can also obtain the segmentation results of any Image through this Colab: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oX14f6IneGGw612WgVlAiy91UHwFAvr9?usp=sharing)
+                📣 你也可以通过此 Colab 获得任意图片的分割结果：[![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oX14f6IneGGw612WgVlAiy91UHwFAvr9?usp=sharing)
                 
-                😚 A huge thanks goes out to the @HuggingFace Team for supporting us with GPU grant.
+                😚 非常感谢 @HuggingFace 团队为我们提供 GPU 支持。
                 
-                🏠 Check out our [Model Card 🏃](https://huggingface.co/An-619/FastSAM)
+                🏠 查看我们的 [模型卡 🏃](https://huggingface.co/An-619/FastSAM)
                 
               """
 
-description_p = """ # 🎯 Instructions for points mode
-                This is a demo on Github project 🏃 [Fast Segment Anything Model](https://github.com/CASIA-IVA-Lab/FastSAM). Welcome to give a star ⭐️ to it.
+description_p = """ # 🎯 点模式使用说明
+                这是 Github 项目 🏃 [Fast Segment Anything Model](https://github.com/CASIA-IVA-Lab/FastSAM) 的演示。欢迎为其点亮一颗星 ⭐️。
                 
-                1. Upload an image or choose an example.
+                1. 上传图片或选择示例。
                 
-                2. Choose the point label ('Add mask' means a positive point. 'Remove' Area means a negative point that is not segmented).
+                2. 选择点标签（“添加掩码”表示正点，“移除区域”表示不分割的负点）。
                 
-                3. Add points one by one on the image.
+                3. 在图片上逐个添加点。
                 
-                4. Click the 'Segment with points prompt' button to get the segmentation results.
+                4. 点击“点提示分割”按钮获取分割结果。
                 
-                **5. If you get Error, click the 'Clear points' button and try again may help.**
+                **5. 如果出错，点击“清除点”按钮后重试可能有帮助。**
                 
               """
 
@@ -190,11 +190,11 @@ def get_points_with_draw(image, label, evt: gr.SelectData):
     global global_point_label
 
     x, y = evt.index[0], evt.index[1]
-    point_radius, point_color = 15, (255, 255, 0) if label == 'Add Mask' else (255, 0, 255)
+    point_radius, point_color = 15, (255, 255, 0) if label == '添加掩码' else (255, 0, 255)
     global_points.append([x, y])
-    global_point_label.append(1 if label == 'Add Mask' else 0)
+    global_point_label.append(1 if label == '添加掩码' else 0)
     
-    print(x, y, label == 'Add Mask')
+    print(x, y, label == '添加掩码')
     
     # 创建一个可以在图像上绘图的对象
     draw = ImageDraw.Draw(image)
@@ -202,13 +202,13 @@ def get_points_with_draw(image, label, evt: gr.SelectData):
     return image
 
 
-cond_img_e = gr.Image(label="Input", value=default_example[0], type='pil')
-cond_img_p = gr.Image(label="Input with points", value=default_example[0], type='pil')
-cond_img_t = gr.Image(label="Input with text", value="examples/dogs.jpg", type='pil')
+cond_img_e = gr.Image(label="输入图片", value=default_example[0], type='pil')
+cond_img_p = gr.Image(label="带点的输入图片", value=default_example[0], type='pil')
+cond_img_t = gr.Image(label="带文本的输入图片", value="examples/dogs.jpg", type='pil')
 
-segm_img_e = gr.Image(label="Segmented Image", interactive=False, type='pil')
-segm_img_p = gr.Image(label="Segmented Image with points", interactive=False, type='pil')
-segm_img_t = gr.Image(label="Segmented Image with text", interactive=False, type='pil')
+segm_img_e = gr.Image(label="分割结果", interactive=False, type='pil')
+segm_img_p = gr.Image(label="点分割结果", interactive=False, type='pil')
+segm_img_t = gr.Image(label="文本分割结果", interactive=False, type='pil')
 
 global_points = []
 global_point_label = []
@@ -217,8 +217,8 @@ input_size_slider = gr.components.Slider(minimum=512,
                                          maximum=1024,
                                          value=1024,
                                          step=64,
-                                         label='Input_size',
-                                         info='Our model was trained on a size of 1024')
+                                         label='输入尺寸',
+                                         info='我们的模型训练尺寸为 1024')
 
 with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
     with gr.Row():
@@ -230,7 +230,7 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
             # News
             gr.Markdown(news)
 
-    with gr.Tab("Everything mode"):
+    with gr.Tab("全分割模式"):
         # Images
         with gr.Row(variant="panel"):
             with gr.Column(scale=1):
@@ -245,28 +245,20 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
                 input_size_slider.render()
 
                 with gr.Row():
-                    contour_check = gr.Checkbox(value=True, label='withContours', info='draw the edges of the masks')
+                    contour_check = gr.Checkbox(value=True, label='显示边缘', info='绘制掩码边缘')
 
                     with gr.Column():
-                        segment_btn_e = gr.Button("Segment Everything", variant='primary')
-                        clear_btn_e = gr.Button("Clear", variant="secondary")
-
-                # gr.Markdown("Try some of the examples below ⬇️")
-                # gr.Examples(examples=[],
-                #             inputs=[cond_img_e],
-                #             outputs=segm_img_e,
-                #             fn=segment_everything,
-                #             cache_examples=True,
-                #             examples_per_page=4)
+                        segment_btn_e = gr.Button("一键全分割", variant='primary')
+                        clear_btn_e = gr.Button("清除", variant="secondary")
 
             with gr.Column():
-                with gr.Accordion("Advanced options", open=False):
-                    iou_threshold = gr.Slider(0.1, 0.9, 0.7, step=0.1, label='iou', info='iou threshold for filtering the annotations')
-                    conf_threshold = gr.Slider(0.1, 0.9, 0.25, step=0.05, label='conf', info='object confidence threshold')
+                with gr.Accordion("高级选项", open=False):
+                    iou_threshold = gr.Slider(0.1, 0.9, 0.7, step=0.1, label='iou 阈值', info='用于过滤注释的 iou 阈值')
+                    conf_threshold = gr.Slider(0.1, 0.9, 0.25, step=0.05, label='置信度阈值', info='目标置信度阈值')
                     with gr.Row():
-                        mor_check = gr.Checkbox(value=False, label='better_visual_quality', info='better quality using morphologyEx')
+                        mor_check = gr.Checkbox(value=False, label='更好视觉质量', info='使用 morphologyEx 获得更好质量')
                         with gr.Column():
-                            retina_check = gr.Checkbox(value=True, label='use_retina', info='draw high-resolution segmentation masks')
+                            retina_check = gr.Checkbox(value=True, label='高分辨率掩码', info='绘制高分辨率分割掩码')
 
                 # Description
                 gr.Markdown(description_e)
@@ -283,7 +275,7 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
                         ],
                         outputs=segm_img_e)
 
-    with gr.Tab("Points mode"):
+    with gr.Tab("点模式"):
         # Images
         with gr.Row(variant="panel"):
             with gr.Column(scale=1):
@@ -296,19 +288,11 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
         with gr.Row():
             with gr.Column():
                 with gr.Row():
-                    add_or_remove = gr.Radio(["Add Mask", "Remove Area"], value="Add Mask", label="Point_label (foreground/background)")
+                    add_or_remove = gr.Radio(["添加掩码", "移除区域"], value="添加掩码", label="点标签（前景/背景）")
 
                     with gr.Column():
-                        segment_btn_p = gr.Button("Segment with points prompt", variant='primary')
-                        clear_btn_p = gr.Button("Clear points", variant='secondary')
-
-                # gr.Markdown("Try some of the examples below ⬇️")
-                # gr.Examples(examples=[],
-                #             inputs=[cond_img_p],
-                #             outputs=segm_img_p,
-                #             fn=segment_with_points,
-                #             cache_examples=True,
-                #             examples_per_page=4)
+                        segment_btn_p = gr.Button("点提示分割", variant='primary')
+                        clear_btn_p = gr.Button("清除点", variant='secondary')
 
             with gr.Column():
                 # Description
@@ -320,7 +304,7 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
                         inputs=[cond_img_p],
                         outputs=[segm_img_p])
 
-    with gr.Tab("Text mode"):
+    with gr.Tab("文本模式"):
         # Images
         with gr.Row(variant="panel"):
             with gr.Column(scale=1):
@@ -336,33 +320,25 @@ with gr.Blocks(css=css, title='Fast Segment Anything') as demo:
                                                            maximum=1024,
                                                            value=1024,
                                                            step=64,
-                                                           label='Input_size',
-                                                           info='Our model was trained on a size of 1024')
+                                                           label='输入尺寸',
+                                                           info='我们的模型训练尺寸为 1024')
                 with gr.Row():
                     with gr.Column():
-                        contour_check = gr.Checkbox(value=True, label='withContours', info='draw the edges of the masks')
-                        text_box = gr.Textbox(label="text prompt", value="a black dog")
+                        contour_check = gr.Checkbox(value=True, label='显示边缘', info='绘制掩码边缘')
+                        text_box = gr.Textbox(label="文本提示", value="a black dog")
 
                     with gr.Column():
-                        segment_btn_t = gr.Button("Segment with text", variant='primary')
-                        clear_btn_t = gr.Button("Clear", variant="secondary")
-
-                # gr.Markdown("Try some of the examples below ⬇️")
-                # gr.Examples(examples=[],
-                #             inputs=[cond_img_e],
-                #             outputs=segm_img_e,
-                #             fn=segment_everything,
-                #             cache_examples=True,
-                #             examples_per_page=4)
+                        segment_btn_t = gr.Button("文本分割", variant='primary')
+                        clear_btn_t = gr.Button("清除", variant="secondary")
 
             with gr.Column():
-                with gr.Accordion("Advanced options", open=False):
-                    iou_threshold = gr.Slider(0.1, 0.9, 0.7, step=0.1, label='iou', info='iou threshold for filtering the annotations')
-                    conf_threshold = gr.Slider(0.1, 0.9, 0.25, step=0.05, label='conf', info='object confidence threshold')
+                with gr.Accordion("高级选项", open=False):
+                    iou_threshold = gr.Slider(0.1, 0.9, 0.7, step=0.1, label='iou 阈值', info='用于过滤注释的 iou 阈值')
+                    conf_threshold = gr.Slider(0.1, 0.9, 0.25, step=0.05, label='置信度阈值', info='目标置信度阈值')
                     with gr.Row():
-                        mor_check = gr.Checkbox(value=False, label='better_visual_quality', info='better quality using morphologyEx')
-                        retina_check = gr.Checkbox(value=True, label='use_retina', info='draw high-resolution segmentation masks')
-                        wider_check = gr.Checkbox(value=False, label='wider', info='wider result')
+                        mor_check = gr.Checkbox(value=False, label='更好视觉质量', info='使用 morphologyEx 获得更好质量')
+                        retina_check = gr.Checkbox(value=True, label='高分辨率掩码', info='绘制高分辨率分割掩码')
+                        wider_check = gr.Checkbox(value=False, label='更宽结果', info='更宽的分割结果')
 
                 # Description
                 gr.Markdown(description_e)
